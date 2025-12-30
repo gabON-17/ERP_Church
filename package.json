@@ -1,0 +1,19 @@
+{
+  "name": "erp_church",
+  "version": "1.0.0",
+  "description": "ERP criado para administrar uma igreja",
+  "main": "main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "start:dev": "nodemon dist/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}
