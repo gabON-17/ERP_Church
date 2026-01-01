@@ -7,7 +7,7 @@ export class UsersRouter implements Routes {
   constructor(
     private readonly usersController: UsersController,
     private router: Router,
-    private readonly endPoits: endPoits = {
+    readonly endPoints: endPoits = {
       get_routes: ["/", "/:id"],
       post_routes: ["/create"],
       path_routes: [],
@@ -16,15 +16,21 @@ export class UsersRouter implements Routes {
   ) {}
 
   routing(): void {
-    this.router.get(this.endPoits.get_routes[0], this.findAll.bind(this));
+    this.router.get(this.endPoints.get_routes[0], this.findAll.bind(this));
+    this.router.get(this.endPoints.get_routes[1], this.findOne.bind(this));
+    this.router.post(this.endPoints.post_routes[0], this.create.bind(this));
   }
 
   private findAll(req: Request, res: Response): void {
     this.usersController.findAll(req, res);
   }
 
-  private create(): void {
-    this.router.post(this.endPoits.post_routes[0], (req, res) => {});
+  private findOne(req: Request, res: Response): void {
+    this.usersController.findOne(req, res);
+  }
+
+  private create(req: Request, res: Response): void {
+    this.usersController.create(req, res);
   }
 
   getRouter(): Router {
