@@ -1,5 +1,5 @@
 export class CultEntity {
-  id: string;
+  id!: string;
   cult_name: string;
   theme: string;
   cult_date: Date;

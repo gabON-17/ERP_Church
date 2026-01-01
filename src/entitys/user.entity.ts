@@ -1,7 +1,7 @@
 import { address } from "../utils/types/address.type";
 
 export class UserEntity {
-  id: string;
+  id!: string;
   full_name: string;
   social_name: string;
   date_birth: Date;
