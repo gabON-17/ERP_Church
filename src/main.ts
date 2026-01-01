@@ -5,18 +5,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+app.use(express.json());
+
 const usersRouter: UsersRouter = new UsersRouter(
   new UsersController(),
   Router()
 );
 
 usersRouter.routing();
-// console.log(usersRouter.getRouter().stack);
-
 app.use("/users", usersRouter.getRouter());
-app.use(express.json());
-
-// console.log(app.router.stack);
 
 app.listen(process.env.PORT, () => {
   console.log(`Servidor rodando em http://localhost:${process.env.PORT}`);
