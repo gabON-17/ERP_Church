@@ -6,7 +6,7 @@ export class UserEntity {
   social_name: string;
   date_birth: Date;
   sex: "M" | "F";
-  telephone: number;
+  telephone: string;
   email: string;
   address: address;
 }
