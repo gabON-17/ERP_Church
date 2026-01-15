@@ -1,31 +1,40 @@
 import { NextFunction, Request, Response } from "express";
-import { logger } from "../../logger/logger.config";
 import { plainToInstance } from "class-transformer";
 import { validate, ValidationError } from "class-validator";
-import { UserDTO } from "../dtos/user.dto";
+import { LoggerUtil } from "../utils/logger/Logger.util";
 
 export class VerifyDtoMiddleware {
-  static async verifyDTO(req: Request, res: Response, next: NextFunction) {
-    const body: undefined = req.body;
+  static async verifyDTO(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    dto: any
+  ) {
+    const body: undefined | Object = req.body;
     let errors: ValidationError[] = [];
 
     if (!body) {
-      logger.debug("Body da requisição não enviado para o middleware");
+      LoggerUtil.debug("Body da requisição não enviado para o middleware");
       return res
         .status(403)
         .json({ message: "Error. body não enviado", stausCode: 403 });
     }
 
     try {
-      const result: unknown = plainToInstance(UserDTO, body);
+      const result: unknown = plainToInstance(dto, body);
 
       typeof result == "object" && result
         ? (errors = await validate(result))
         : new Error("Error no Middleware; VerifyDtoMiddleware");
 
-      if (errors.length === 0) return next();
+      if (errors.length === 0) {
+        return next();
+      }
 
-      logger.debug("Error no middleware: VerifyDtoMiddleware");
+      LoggerUtil.error(
+        "Error no middleware: VerifyDtoMiddleware (Body inválido)"
+      );
+
       return res
         .status(400)
         .json({ message: `Error: ${errors}`, statusCode: 400 });

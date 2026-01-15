@@ -1,6 +1,6 @@
 export type endPoits = {
-  get: string[];
-  post: string[];
-  path: string[];
-  delete: string[];
+  get: Object<string>;
+  post: Object<string>;
+  path: Object<string>;
+  delete: Object<string>;
 };
