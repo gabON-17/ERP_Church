@@ -4,21 +4,18 @@ import { MemberDTO } from "../utils/dtos/member.dto";
 import { LoggerUtil } from "../utils/logger/Logger.util";
 import { ResModel } from "../utils/types/ResModel";
 import { MinistryEntity } from "../entitys/Ministry.entity";
-import { MinistryRepository } from "./ministry.model";
-import { isArray, min } from "class-validator";
+import { MinistryModel } from "./ministry.model";
 
-export class MembersRepository {
+export class MembersModel {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly ministryRepository: MinistryRepository,
-    private readonly memberRepository: Repository<MemberEntity> = dataSource.getRepository(
-      MemberEntity
-    )
+    private readonly ministryModel: MinistryModel,
+    private readonly memberRepository: Repository<MemberEntity>
   ) {}
 
   async create(member: MemberDTO): Promise<ResModel> {
     console.log(member.uuids_ministry);
-    const resModel: ResModel = await this.ministryRepository.findOne(
+    const resModel: ResModel = await this.ministryModel.findOne(
       member.uuids_ministry
     );
     let ministrys: MinistryEntity[];

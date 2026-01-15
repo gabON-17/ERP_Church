@@ -18,7 +18,7 @@ export class MinistryEntity {
 
   @JoinColumn()
   @OneToOne(() => MemberEntity, (member) => member.uuid)
-  lead_ministry: string;
+  lead_ministry: MemberEntity;
 
   @ManyToMany(() => MemberEntity, (member) => member.ministry)
   members: MemberEntity[];

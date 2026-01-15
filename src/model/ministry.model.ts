@@ -3,17 +3,18 @@ import { MinistryDTO } from "../utils/dtos/ministry.dto";
 import { MinistryEntity } from "../entitys/Ministry.entity";
 import { ResModel } from "../utils/types/ResModel";
 import { LoggerUtil } from "../utils/logger/Logger.util";
+import { MembersModel } from "./members.model";
 
-export class MinistryRepository {
+export class MinistryModel {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly ministryRepository: Repository<MinistryEntity> = dataSource.getRepository(
-      MinistryEntity
-    )
+    private readonly membersRepository: MembersModel,
+    private readonly ministryRepository: Repository<MinistryEntity>
   ) {}
 
   async create(ministryDTO: MinistryDTO): Promise<ResModel> {
     LoggerUtil.debug("MINISTRY MODEL --> Salvando usuário no banco de dados");
+
     const ministry: MinistryEntity = {
       uuid: crypto.randomUUID(),
       name: ministryDTO.name,
@@ -37,7 +38,22 @@ export class MinistryRepository {
     LoggerUtil.info("MINISTRY MODEL --> Consultando tabela Ministrys...");
     const ministrys: MinistryEntity[] = await this.ministryRepository.find({
       relations: ["lead_ministry", "members"],
-      select: { lead_ministry: { full_name: true } },
+      select: {
+        members: {
+          uuid: true,
+          full_name: true,
+          social_name: true,
+          email: true,
+        },
+
+        lead_ministry: {
+          uuid: true,
+          full_name: true,
+          social_name: true,
+          telephone: true,
+          email: true,
+        },
+      },
     });
 
     if (ministrys.length === 0) {

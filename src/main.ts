@@ -12,15 +12,15 @@ import { MinistryController } from "./controller/ministry.controller";
 import { MembersSerice } from "./service/members.service";
 import { MinistryService } from "./service/ministry.service";
 
-import { MembersRepository } from "./model/members.model";
+import { memberModel } from "./model/instances/memberModel.instace";
+import { ministryModel } from "./model/instances/ministryModel.instance";
 
 import { logger } from "./utils/logger/logger.config";
+import { LoggerUtil } from "./utils/logger/Logger.util";
 import PinoHttp from "pino-http";
 
 import { AppDataSource } from "./model/connection/data.config";
-import { LoggerUtil } from "./utils/logger/Logger.util";
-import { MinistryRepository } from "./model/ministry.model";
-import { bootDB } from "./model/connection/BootConnection.config";
+import { bootDB } from "./model/connection/bootConnection.config";
 
 const app = express();
 
@@ -53,18 +53,8 @@ app.use(
   })
 );
 
-const ministryRepository: MinistryRepository = new MinistryRepository(
-  AppDataSource
-);
-const membersRepository: MembersRepository = new MembersRepository(
-  AppDataSource,
-  ministryRepository
-);
-
-const membersService: MembersSerice = new MembersSerice(membersRepository);
-const ministryService: MinistryService = new MinistryService(
-  ministryRepository
-);
+const membersService: MembersSerice = new MembersSerice(memberModel);
+const ministryService: MinistryService = new MinistryService(ministryModel);
 
 const membersController: MembersController = new MembersController(
   membersService
