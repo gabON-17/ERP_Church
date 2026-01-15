@@ -20,7 +20,7 @@ export class MinistryController {
 
     return res
       .status(400)
-      .json({ message: "Error ao criar o usuário", statusCode: 400 });
+      .json({ message: "Error ao cadastrar o ministério", statusCode: 400 });
   }
 
   async findAll(
@@ -42,5 +42,26 @@ export class MinistryController {
       statusCode: 200,
       ministrys: ministrys,
     });
+  }
+
+  async findOne(
+    req: Request,
+    res: Response,
+    next?: NextFunction
+  ): Promise<Response> {
+    const uuid: string = req.params.uuid;
+
+    const ministry: null | MinistryEntity[] =
+      await this.ministryService.findOne(uuid);
+
+    if (!ministry) {
+      return res
+        .status(404)
+        .json({ message: "Ministério não encontrado", statusCode: 404 });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "OK", statusCode: 200, ministry: ministry });
   }
 }

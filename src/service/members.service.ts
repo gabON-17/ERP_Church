@@ -1,16 +1,16 @@
 import { MemberEntity } from "../entitys/Member.entity";
-import { MembersRepository } from "../model/members.model";
+import { MembersModel } from "../model/members.model";
 import { MemberDTO } from "../utils/dtos/member.dto";
 import { LoggerUtil } from "../utils/logger/Logger.util";
 import { ResModel } from "../utils/types/ResModel";
 
 export class MembersSerice {
-  constructor(readonly membersRepositoty: MembersRepository) {}
+  constructor(readonly membersModel: MembersModel) {}
 
   async create(memberDTO: MemberDTO): Promise<void | boolean> {
     LoggerUtil.info("USER SERVICE --> Criando o usuário...");
 
-    const repositoryResponse: ResModel = await this.membersRepositoty.create(
+    const repositoryResponse: ResModel = await this.membersModel.create(
       memberDTO
     );
 
@@ -23,18 +23,14 @@ export class MembersSerice {
 
   async findAll(): Promise<MemberEntity[]> {
     LoggerUtil.info("USER SERVICE --> Consultando banco...");
-    const response: ResModel = await this.membersRepositoty.findAll();
+    const response: ResModel = await this.membersModel.findAll();
     const members: MemberEntity[] = await response.data;
-
-    members.map((value) => {
-      value.address = JSON.parse(value.address);
-    });
 
     return members;
   }
 
   async findOne(uuid: string): Promise<null | MemberEntity> {
-    const member: ResModel = await this.membersRepositoty.findOne(uuid);
+    const member: ResModel = await this.membersModel.findOne(uuid);
 
     if (member.status) {
       member.data.address = JSON.parse(member.data.address);

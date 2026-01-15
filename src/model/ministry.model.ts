@@ -8,17 +8,33 @@ import { MembersModel } from "./members.model";
 export class MinistryModel {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly membersRepository: MembersModel,
-    private readonly ministryRepository: Repository<MinistryEntity>
+    private readonly ministryRepository: Repository<MinistryEntity>,
+    private membersModel?: MembersModel
   ) {}
 
   async create(ministryDTO: MinistryDTO): Promise<ResModel> {
-    LoggerUtil.debug("MINISTRY MODEL --> Salvando usuário no banco de dados");
+    LoggerUtil.debug(
+      "MINISTRY MODEL --> Salvando ministério no banco de dados..."
+    );
+    LoggerUtil.debug(`MEMBERS MODEL --> ${console.log(this.membersModel)}`);
+    let member: ResModel;
+    try {
+      member = await this.membersModel!.findOne(ministryDTO.lead_ministry);
+      if (!member.status) {
+        throw new Error("Ministério inválido");
+      }
+    } catch (e) {
+      e instanceof TypeError
+        ? LoggerUtil.error(`MINISTRY MODEL --> Error no servidor. Error: ${e}`)
+        : LoggerUtil.error(`Error ao cadastrar o ministério. Error: ${e}`);
+
+      return { status: false };
+    }
 
     const ministry: MinistryEntity = {
       uuid: crypto.randomUUID(),
       name: ministryDTO.name,
-      lead_ministry: ministryDTO.lead_ministry,
+      lead_ministry: member.data,
       members: [],
       branch: ministryDTO.branch,
     };
@@ -27,9 +43,7 @@ export class MinistryModel {
       await this.ministryRepository.save(ministry);
       return { status: true };
     } catch (e: any) {
-      LoggerUtil.error(
-        `MINISTRY MODEL --> Error ao salvar o usuário: ${e.message}`
-      );
+      LoggerUtil.error(`MINISTRY MODEL --> Error ao salvar o ministério: ${e}`);
       return { status: false };
     }
   }
@@ -61,23 +75,25 @@ export class MinistryModel {
       return { status: false, data: null };
     }
 
-    LoggerUtil.info("MISTRY MODEL --> Usuários encontrados!");
+    LoggerUtil.info("MISTRY MODEL --> Ministérios encontrados!");
     return { status: true, data: ministrys };
   }
 
-  async findOne(uuids: string[]): Promise<ResModel> {
+  async findMinistrys(uuids: string[]): Promise<ResModel> {
     let ministrys: MinistryEntity[] = [];
 
     for (let uuidKey of uuids) {
       try {
-        let ministry: MinistryEntity | null =
-          await this.ministryRepository.findOne({ where: { uuid: uuidKey } });
+        let ministry: MinistryEntity[] | null =
+          await this.ministryRepository.find({
+            where: { uuid: uuidKey },
+          });
 
         if (!ministry) {
           throw new Error("Ministério inválido");
         }
 
-        ministrys.push(ministry);
+        ministrys.push(ministry[0]);
       } catch (e: Error | any) {
         LoggerUtil.error(`MINISTRY MODEL --> Erro: ${e.message}`);
         LoggerUtil.error(`MINISTRY MODEL --> Ministério enviado: ${uuidKey}`);
@@ -86,5 +102,9 @@ export class MinistryModel {
     }
 
     return { status: true, data: ministrys };
+  }
+
+  public set setMembersModel(model: MembersModel) {
+    this.membersModel = model;
   }
 }

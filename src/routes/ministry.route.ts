@@ -27,6 +27,7 @@ export class MinistryRouter implements Routes {
     );
 
     this.router.get(this.endPoints.get.findAll, this.findAll.bind(this));
+    this.router.get(this.endPoints.get.finOne, this.findOne.bind(this));
   }
 
   getRouter(): Router {
@@ -35,6 +36,10 @@ export class MinistryRouter implements Routes {
 
   private findAll(req: Request, res: Response, next: NextFunction) {
     this.ministryController.findAll(req, res);
+  }
+
+  private findOne(req: Request, res: Response, next: NextFunction) {
+    this.ministryController.findOne(req, res);
   }
 
   private create(req: Request, res: Response, next: NextFunction) {

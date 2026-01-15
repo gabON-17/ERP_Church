@@ -9,13 +9,13 @@ import { MinistryModel } from "./ministry.model";
 export class MembersModel {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly ministryModel: MinistryModel,
-    private readonly memberRepository: Repository<MemberEntity>
+    private readonly memberRepository: Repository<MemberEntity>,
+    private ministryModel?: MinistryModel
   ) {}
 
   async create(member: MemberDTO): Promise<ResModel> {
     console.log(member.uuids_ministry);
-    const resModel: ResModel = await this.ministryModel.findOne(
+    const resModel: ResModel = await this.ministryModel!.findMinistrys(
       member.uuids_ministry
     );
     let ministrys: MinistryEntity[];
@@ -54,6 +54,9 @@ export class MembersModel {
       const users: MemberEntity[] = await this.memberRepository.find({
         relations: ["ministry"],
       });
+
+      users.map((value) => (value.address = JSON.parse(value.address)));
+
       return { status: true, data: users };
     } catch (e) {
       LoggerUtil.error(
@@ -78,5 +81,9 @@ export class MembersModel {
       LoggerUtil.error(`MEMBERS REPOSITORY --> ERROR: ${e.message}`);
       return { status: false };
     }
+  }
+
+  public set setMinistryModel(model: MinistryModel) {
+    this.ministryModel = model;
   }
 }
