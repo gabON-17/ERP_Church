@@ -3,18 +3,25 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
   PrimaryColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { MemberEntity } from "./Member.entity";
 
 @Entity({ name: "offers" })
-export class OfferEntity {
+export class ContributionsEntity {
   @PrimaryColumn()
   uuid?: UUID;
 
-  @OneToOne(() => MemberEntity, (member) => member.uuid)
-  member: string;
+  @Column()
+  type: "dizimo" | "oferta";
+
+  @JoinColumn()
+  @OneToMany(() => MemberEntity, (member) => member.contributions)
+  member: MemberEntity;
 
   @Column()
   value: number;
@@ -22,6 +29,12 @@ export class OfferEntity {
   @Column()
   date: Date;
 
+  @Column()
+  payment_type: string;
+
   @CreateDateColumn()
   creatAt?: Date;
+
+  @UpdateDateColumn()
+  updateAt?: Date;
 }

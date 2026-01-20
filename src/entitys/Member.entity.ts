@@ -2,12 +2,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { MinistryEntity } from "./Ministry.entity";
+import { ContributionsEntity } from "./Contributions.entity";
 
 @Entity({ name: "members" })
 export class MemberEntity {
@@ -42,11 +45,8 @@ export class MemberEntity {
   @ManyToMany(() => MinistryEntity, (ministry) => ministry.members)
   ministry: MinistryEntity[];
 
-  // @Column()
-  // tenths: TenthEntity[];
-
-  // @Column()
-  // offers: OfferEntity[];
+  @ManyToOne(() => ContributionsEntity, (contribution) => contribution.member)
+  contributions?: ContributionsEntity[];
 
   @Column()
   status?: "Ativo" | "Desligado";
