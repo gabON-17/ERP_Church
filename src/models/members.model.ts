@@ -2,25 +2,25 @@ import { DataSource, Repository } from "typeorm";
 import { MemberEntity } from "../entitys/Member.entity";
 import { MemberDTO } from "../utils/dtos/member.dto";
 import { LoggerUtil } from "../utils/logger/Logger.util";
-import { ResModel } from "../utils/types/ResModel";
-import { MinistryEntity } from "../entitys/Ministry.entity";
+import { InternalRes } from "../utils/types/internalRes";
 import { MinistryModel } from "./ministry.model";
+import { MinistryEntity } from "../entitys/Ministry.entity";
 
 export class MembersModel {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly memberRepository: Repository<MemberEntity>,
-    private ministryModel?: MinistryModel
+    private readonly memberRepository: Repository<MemberEntity> = dataSource.getRepository(MemberEntity),
   ) {}
 
-  async create(member: MemberDTO): Promise<ResModel> {
-    console.log(member.uuids_ministry);
-    const resModel: ResModel = await this.ministryModel!.findMinistrys(
-      member.uuids_ministry
-    );
-    let ministrys: MinistryEntity[];
-
-    resModel.status ? (ministrys = resModel.data) : (ministrys = []);
+  async create(member: MemberDTO): Promise<InternalRes> {
+    
+    try {
+      for (let object of member.ministrys) {
+        if (!(object instanceof MinistryEntity)) throw new Error("Ministério inválido")
+      }
+    } catch (e: any) {
+      return { status: false, error: e }
+    }
 
     const newMember: MemberEntity = {
       uuid: crypto.randomUUID(),
@@ -33,7 +33,7 @@ export class MembersModel {
       telephone: member.telephone,
       address: JSON.stringify(member.address),
       date_baptism: member.date_baptism,
-      ministry: ministrys,
+      ministry: member.ministrys,
       status: "Ativo",
       presence: 0,
     };
@@ -43,13 +43,13 @@ export class MembersModel {
 
       LoggerUtil.info(`MODEL --> Usuário cadastrado!`);
       return { status: true };
-    } catch (e) {
+    } catch (e: any) {
       LoggerUtil.error(`MODEL --> Error ao cadastrar o usuário ${e}`);
-      return { status: false };
+      return { status: false, error: e };
     }
   }
 
-  async findAll(): Promise<ResModel> {
+  async findAll(): Promise<InternalRes> {
     try {
       const users: MemberEntity[] = await this.memberRepository.find({
         relations: ["ministry"],
@@ -66,7 +66,7 @@ export class MembersModel {
     }
   }
 
-  async findOne(uuid: string): Promise<ResModel> {
+  async findOne(uuid: string): Promise<InternalRes> {
     try {
       const member: null | MemberEntity = await this.memberRepository.findOne({
         where: { uuid: uuid },
@@ -79,11 +79,7 @@ export class MembersModel {
       return { status: true, data: member };
     } catch (e: any) {
       LoggerUtil.error(`MEMBERS REPOSITORY --> ERROR: ${e.message}`);
-      return { status: false };
+      return { status: false, error: e.message };
     }
-  }
-
-  public set setMinistryModel(model: MinistryModel) {
-    this.ministryModel = model;
   }
 }

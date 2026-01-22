@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import { MembersSerice } from "../service/members.service";
+import { MembersSerice } from "../services/members.service";
 import { MemberEntity } from "../entitys/Member.entity";
 import { LoggerUtil } from "../utils/logger/Logger.util";
+import { InternalRes } from "../utils/types/internalRes";
 
 export class MembersController {
   constructor(readonly membersService: MembersSerice) {}
@@ -13,8 +14,8 @@ export class MembersController {
 
     if (!member) {
       return res
-        .status(404)
-        .json({ message: "Membro não encontrado", statusCode: 404 });
+      .status(404)
+      .json({ message: "Membro não encontrado", statusCode: 404 });
     }
 
     return res
@@ -24,9 +25,9 @@ export class MembersController {
 
   async findAll(req: Request, res: Response): Promise<Response> {
     LoggerUtil.info("USER CONTROLLER --> Requisição feita");
-    const list_user: MemberEntity[] = await this.membersService.findAll();
+    const list_user: InternalRes = await this.membersService.findAll();
 
-    if (list_user.length === 0) {
+    if (list_user.data.length === 0) {
       return res
         .status(404)
         .json({ message: "Nenhum registro encontrado", statusCode: 404 });
@@ -35,7 +36,7 @@ export class MembersController {
     return res.status(200).json({
       message: "OK",
       statusCode: 200,
-      totalUsers: list_user.length,
+      totalUsers: list_user.data.length,
       users: list_user,
     });
   }
@@ -43,11 +44,11 @@ export class MembersController {
   async create(req: Request, res: Response): Promise<Response> {
     LoggerUtil.info("USER CONTROLLER --> Requisição feita");
 
-    const serviceResponse: void | boolean = await this.membersService.create(
+    const serviceResponse: InternalRes = await this.membersService.create(
       req.body
     );
 
-    if (!serviceResponse) {
+    if (!serviceResponse.status) {
       return res
         .status(403)
         .json({ message: "Error. Usuário não definido", statusCode: 403 });

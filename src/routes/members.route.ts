@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { Routes } from "../utils/interfaces/routes.interface";
 import { endPoits } from "../utils/types/endPoints";
-import { MembersController } from "../controller/members.controller";
+import { MembersController } from "../controllers/members.controller";
 import { VerifyDtoMiddleware } from "../middlewares/verifyDTO.middleware";
 import { MemberDTO } from "../utils/dtos/member.dto";
 import { VerifyParamsMiddleware } from "../middlewares/verifyPARAMS.middleware";

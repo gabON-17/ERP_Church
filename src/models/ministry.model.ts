@@ -1,54 +1,39 @@
 import { DataSource, Repository } from "typeorm";
 import { MinistryDTO } from "../utils/dtos/ministry.dto";
 import { MinistryEntity } from "../entitys/Ministry.entity";
-import { ResModel } from "../utils/types/ResModel";
+import { InternalRes } from "../utils/types/internalRes";
 import { LoggerUtil } from "../utils/logger/Logger.util";
-import { MembersModel } from "./members.model";
+
+import { MemberEntity } from "../entitys/Member.entity";
 
 export class MinistryModel {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly ministryRepository: Repository<MinistryEntity>,
-    private membersModel?: MembersModel
+    private readonly ministryRepository: Repository<MinistryEntity> = dataSource.getRepository(MinistryEntity),
   ) {}
 
-  async create(ministryDTO: MinistryDTO): Promise<ResModel> {
-    LoggerUtil.debug(
-      "MINISTRY MODEL --> Salvando ministério no banco de dados..."
-    );
-    LoggerUtil.debug(`MEMBERS MODEL --> ${console.log(this.membersModel)}`);
-    let member: ResModel;
+  async create(ministryDTO: MinistryDTO): Promise<InternalRes> {
     try {
-      member = await this.membersModel!.findOne(ministryDTO.lead_ministry);
-      if (!member.status) {
-        throw new Error("Ministério inválido");
+      if (!(ministryDTO.lead_ministry instanceof MemberEntity)) {
+        throw Error("Ministro inválido (espera-se uma instância de MemberEntity)")
       }
-    } catch (e) {
-      e instanceof TypeError
-        ? LoggerUtil.error(`MINISTRY MODEL --> Error no servidor. Error: ${e}`)
-        : LoggerUtil.error(`Error ao cadastrar o ministério. Error: ${e}`);
-
-      return { status: false };
-    }
-
+    
     const ministry: MinistryEntity = {
       uuid: crypto.randomUUID(),
       name: ministryDTO.name,
-      lead_ministry: member.data,
-      members: [],
+      lead_ministry: ministryDTO.lead_ministry,
+      members: [ministryDTO.lead_ministry],
       branch: ministryDTO.branch,
     };
-
-    try {
       await this.ministryRepository.save(ministry);
       return { status: true };
     } catch (e: any) {
       LoggerUtil.error(`MINISTRY MODEL --> Error ao salvar o ministério: ${e}`);
-      return { status: false };
+      return { status: false, error: e };
     }
   }
 
-  async findAll(): Promise<ResModel> {
+  async findAll(): Promise<InternalRes> {
     LoggerUtil.info("MINISTRY MODEL --> Consultando tabela Ministrys...");
     const ministrys: MinistryEntity[] = await this.ministryRepository.find({
       relations: ["lead_ministry", "members"],
@@ -72,14 +57,14 @@ export class MinistryModel {
 
     if (ministrys.length === 0) {
       LoggerUtil.info("MINISTRY MODEL --> Nenhum ministério achado");
-      return { status: false, data: null };
+      return { status: false, error: new Error("Nenhum ministério encontrado") };
     }
 
     LoggerUtil.info("MISTRY MODEL --> Ministérios encontrados!");
     return { status: true, data: ministrys };
   }
 
-  async findMinistrys(uuids: string[]): Promise<ResModel> {
+  async findMinistrys(uuids: string[]): Promise<InternalRes> {
     let ministrys: MinistryEntity[] = [];
 
     for (let uuidKey of uuids) {
@@ -97,14 +82,10 @@ export class MinistryModel {
       } catch (e: Error | any) {
         LoggerUtil.error(`MINISTRY MODEL --> Erro: ${e.message}`);
         LoggerUtil.error(`MINISTRY MODEL --> Ministério enviado: ${uuidKey}`);
-        return { status: false };
+        return { status: false, error: e.message };
       }
     }
 
     return { status: true, data: ministrys };
-  }
-
-  public set setMembersModel(model: MembersModel) {
-    this.membersModel = model;
   }
 }

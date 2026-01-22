@@ -8,7 +8,7 @@ export async function bootDB(dataSource: DataSource): Promise<void> {
       LoggerUtil.info("Concexão com o banco estabelicida com sucesso");
     })
     .catch((error) =>
-      LoggerUtil.info(
+      LoggerUtil.error(
         `ERROR ao estabelecer conexão com Banco de dados: ${error}`
       )
     );

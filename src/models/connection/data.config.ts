@@ -2,8 +2,7 @@ import { DataSource } from "typeorm";
 import { CultEntity } from "../../entitys/Cult.entity";
 import { MemberEntity } from "../../entitys/Member.entity";
 import { MinistryEntity } from "../../entitys/Ministry.entity";
-import { OfferEntity } from "../../entitys/Offer.entity";
-import { TenthEntity } from "../../entitys/Tenth.entity";
+import { ContributionsEntity } from "../../entitys/Contributions.entity";
 
 export const AppDataSource: DataSource = new DataSource({
   type: process.env.TYPE_DB || "postgres",
@@ -18,7 +17,6 @@ export const AppDataSource: DataSource = new DataSource({
     CultEntity,
     MemberEntity,
     MinistryEntity,
-    OfferEntity,
-    TenthEntity,
+    ContributionsEntity
   ],
 });

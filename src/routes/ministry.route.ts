@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { Routes } from "../utils/interfaces/routes.interface";
 import { endPoits } from "../utils/types/endPoints";
-import { MinistryController } from "../controller/ministry.controller";
+import { MinistryController } from "../controllers/ministry.controller";
 import { VerifyDtoMiddleware } from "../middlewares/verifyDTO.middleware";
 import { MinistryDTO } from "../utils/dtos/ministry.dto";
 

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { MinistryService } from "../service/ministry.service";
+import { MinistryService } from "../services/ministry.service";
 import { MinistryEntity } from "../entitys/Ministry.entity";
+import { InternalRes } from "../utils/types/internalRes";
 
 export class MinistryController {
   constructor(private readonly ministryService: MinistryService) {}
@@ -10,9 +11,9 @@ export class MinistryController {
     res: Response,
     next?: NextFunction
   ): Promise<Response> {
-    const status: boolean = await this.ministryService.create(req.body);
+    const resService: InternalRes = await this.ministryService.create(req.body);
 
-    if (status) {
+    if (resService.status) {
       return res
         .status(201)
         .json({ message: "Ministério Cadastrado!", statusCode: 201 });
@@ -28,17 +29,17 @@ export class MinistryController {
     res: Response,
     next?: NextFunction
   ): Promise<Response> {
-    const ministrys: MinistryEntity[] | null =
+    const ministrys: InternalRes =
       await this.ministryService.findAll();
 
-    if (!ministrys)
+    if (!ministrys.status)
       return res
         .status(404)
         .json({ message: "Nenhum ministétério encontrado", statusCode: 404 });
 
     return res.status(200).json({
       message: "Ministérios encontrados!",
-      total_Ministrys: ministrys?.length,
+      total_Ministrys: ministrys.data.length,
       statusCode: 200,
       ministrys: ministrys,
     });
@@ -51,10 +52,10 @@ export class MinistryController {
   ): Promise<Response> {
     const uuid: string = req.params.uuid;
 
-    const ministry: null | MinistryEntity[] =
+    const ministry: InternalRes =
       await this.ministryService.findOne(uuid);
 
-    if (!ministry) {
+    if (!ministry.status) {
       return res
         .status(404)
         .json({ message: "Ministério não encontrado", statusCode: 404 });

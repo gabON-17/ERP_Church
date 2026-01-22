@@ -6,22 +6,22 @@ dotenv.config();
 import { UsersRouter } from "./routes/members.route";
 import { MinistryRouter } from "./routes/ministry.route";
 
-import { MembersController } from "./controller/members.controller";
-import { MinistryController } from "./controller/ministry.controller";
+import { MembersController } from "./controllers/members.controller";
+import { MinistryController } from "./controllers/ministry.controller";
 
-import { MembersSerice } from "./service/members.service";
-import { MinistryService } from "./service/ministry.service";
+import { MembersSerice } from "./services/members.service";
+import { MinistryService } from "./services/ministry.service";
+
+import { MinistryModel } from "./models/ministry.model";
+import { MembersModel } from "./models/members.model";
 
 import { logger } from "./utils/logger/logger.config";
 import { LoggerUtil } from "./utils/logger/Logger.util";
 import PinoHttp from "pino-http";
 
-import { AppDataSource } from "./model/connection/data.config";
-import { bootDB } from "./model/connection/bootConnection.config";
-import { MinistryModel } from "./model/ministry.model";
-import { MinistryEntity } from "./entitys/Ministry.entity";
-import { MembersModel } from "./model/members.model";
-import { MemberEntity } from "./entitys/Member.entity";
+import { AppDataSource } from "./models/connection/data.config";
+import { bootDB } from "./models/connection/bootConnection.config";
+
 
 const app = express();
 
@@ -56,19 +56,15 @@ app.use(
 
 const ministryModel: MinistryModel = new MinistryModel(
   AppDataSource,
-  AppDataSource.getRepository(MinistryEntity)
 );
 
 const memberModel: MembersModel = new MembersModel(
   AppDataSource,
-  AppDataSource.getRepository(MemberEntity)
 );
 
-memberModel.setMinistryModel = ministryModel;
-ministryModel.setMembersModel = memberModel;
 
-const membersService: MembersSerice = new MembersSerice(memberModel);
-const ministryService: MinistryService = new MinistryService(ministryModel);
+const membersService: MembersSerice = new MembersSerice(memberModel, ministryModel);
+const ministryService: MinistryService = new MinistryService(ministryModel, memberModel);
 
 const membersController: MembersController = new MembersController(
   membersService
